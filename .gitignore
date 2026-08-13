@@ -1,0 +1,47 @@
+# Dependencies — native binaries; never copy between machines
+node_modules/
+
+# Secrets and local env (keep .env.example as the placeholder)
+.env
+.env.*
+.env.keys
+!.env.example
+
+# Credentials and keys
+*.pem
+*.p12
+*.pfx
+*.key
+!*.example.key
+credentials.json
+secrets.json
+service-account*.json
+
+# Build output
+dist/
+server.js
+*.tsbuildinfo
+
+# Logs and debug
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Caches
+.cache/
+.vite/
+*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.idea/
+*.swp
+*.swo
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example

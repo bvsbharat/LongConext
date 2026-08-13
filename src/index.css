@@ -1,0 +1,234 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Code+Pro:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+/* MongoDB Atlas / Compass dark — evergreen black, forest #00684A, leaf #00ED64 */
+@theme {
+  --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
+  --font-display: "Source Serif 4", ui-serif, Georgia, serif;
+  --font-mono: "Source Code Pro", ui-monospace, SFMono-Regular, monospace;
+
+  --color-mongo-black: #001e2b;
+  --color-mongo-evergreen: #023430;
+  --color-mongo-spruce: #00684a;
+  --color-mongo-leaf: #00ed64;
+  --color-mongo-mint: #c0fae6;
+  --color-mongo-fog: #e8edeb;
+  --color-mongo-slate: #889397;
+
+  --color-mdb-black: #001e2b;
+  --color-mdb-spruce: #023430;
+  --color-mdb-forest: #00684a;
+  --color-mdb-leaf: #00ed64;
+  --color-mdb-mint: #c0fade;
+  --color-mdb-fog: #e8edeb;
+  --color-mdb-slate: #889397;
+  --color-mdb-card: #0c2a35;
+  --color-mdb-elevated: #16343f;
+  --color-mdb-border: #1c4a4a;
+  --color-mdb-canvas: #001e2b;
+}
+
+:root {
+  --mongo-black: #001e2b;
+  --mongo-evergreen: #023430;
+  --mongo-spruce: #00684a;
+  --mongo-leaf: #00ed64;
+  --mongo-mint: #c0fae6;
+  --mongo-fog: #e8edeb;
+  --mongo-slate: #889397;
+}
+
+html {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: var(--mongo-black);
+  color: var(--mongo-fog);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--mongo-spruce);
+  color: var(--mongo-leaf);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #00684a #001e2b;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #001e2b;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #00684a;
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #00ed64;
+}
+
+.mongo-terminal {
+  font-family: var(--font-mono);
+}
+
+.custom-bento {
+  background: radial-gradient(120% 120% at 50% 10%, #0c2a35 40%, rgba(0, 104, 74, 0.22) 100%);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Bottom navigation dock — Compass/Atlas dark, icon-first like a mobile app bar */
+.agent-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 16px;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.agent-dock-inner {
+  pointer-events: auto;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--mongo-black) 88%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid color-mix(in srgb, var(--mongo-leaf) 22%, transparent);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 237, 100, 0.08),
+    0 0 28px rgba(0, 237, 100, 0.08);
+  color: #fff;
+  max-width: calc(100% - 32px);
+  overflow-x: auto;
+}
+
+.agent-dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 58px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: color-mix(in srgb, var(--mongo-fog) 55%, transparent);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+
+.agent-dock-item:hover:not(:disabled):not(.is-active) {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--mongo-fog);
+}
+
+.agent-dock-item:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.agent-dock-item.is-active {
+  background: var(--mongo-leaf);
+  color: var(--mongo-black);
+  box-shadow: 0 0 16px rgba(0, 237, 100, 0.35);
+}
+
+.agent-dock-item.is-danger {
+  color: #fca5a5;
+}
+
+.agent-dock-item.is-danger:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.14);
+  color: #fecaca;
+}
+
+.agent-dock-item.is-warn {
+  color: #fcd34d;
+}
+
+.agent-dock-item.is-warn:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.16);
+}
+
+.agent-dock-item.is-cta {
+  background: var(--mongo-leaf);
+  color: var(--mongo-black);
+}
+
+.agent-dock-item.is-cta:hover:not(:disabled) {
+  background: #4ff08a;
+  color: var(--mongo-black);
+}
+
+.agent-dock-item.is-cta:disabled {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+  opacity: 1;
+}
+
+.agent-dock-item.is-live {
+  color: var(--mongo-leaf);
+}
+
+.agent-dock-divider {
+  width: 1px;
+  align-self: stretch;
+  min-height: 28px;
+  background: color-mix(in srgb, var(--mongo-leaf) 22%, transparent);
+  flex-shrink: 0;
+  margin: 6px 4px;
+}
+
+.agent-dock-mark {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  margin: 0 4px 0 2px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .agent-dock-mark {
+    display: inline-flex;
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Conquer",
+  "description": "An automated real-time insurance claim lifecycle management agent simulating real-time Redis state caching, live pub/sub, agent phone/EHR tool simulations, and Gemini-powered smart resolutions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
