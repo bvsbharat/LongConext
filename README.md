@@ -2,6 +2,8 @@
 
 A **long-horizon insurance claim agent that does not cold-start.** Open a claim and the agent drives it end to end over days or weeks — texting and calling the policyholder and vendors, keeping state and memory in MongoDB, and stopping for a human adjuster's sign-off before any money moves.
 
+![How a Conquer claim runs for days](docs/conquer-architecture-simple.png)
+
 MongoDB holds **state, lineage, and memory** as three different things. Conflating them is how a long-horizon agent cold-starts.
 
 | Collection | What it is | What it buys |
@@ -16,10 +18,6 @@ MongoDB holds **state, lineage, and memory** as three different things. Conflati
 It is not a chatbot and not a wizard you click through. The agent sends a message, then waits — sometimes for days. An inbound reply is what wakes it up and moves the claim forward.
 
 **It runs with zero configuration.** With an empty `.env`, an ephemeral local `mongod` boots itself and every channel runs in MOCK mode: sends are logged instead of dispatched, so nothing leaves your machine. Add credentials per channel to go live.
-
-![Conquer multi-agent long-horizon architecture](docs/conquer-long-horizon-architecture.png)
-
-The agent keeps running across days until the current task completes. Voice, SMS, and email park on `awaiting_reply`; an inbound webhook (or a connected hangup) is what resumes the thread. Compact `workingMemory` dies with the claim. Checkpoints restore the lineage. Shared `agent_memory` is what the next claim — and the voice agent — already know.
 
 ## Quick start
 
