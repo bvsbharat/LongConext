@@ -37,15 +37,17 @@ No test suite exists in this repo.
 One Express process (`server.ts`) that either mounts Vite as middleware (dev) or serves built `dist/` static assets (prod). No separate API server, no build-time proxy.
 
 ```
-browser (polls /api/*)  ->  Express  ->  orchestrator  ->  channel adapters  ->  vendors
-                                             ^                                      |
-                                             +---------- webhooks <-----------------+
-                                             |
-                              MongoDB: kv (state, locks flag, reverse index)
+UI / bottom dock (polls /api/*) -> Express -> orchestrator -> channel adapters -> vendors
+                                                     ^                                    |
+                                                     +---------- webhooks <---------------+
+                                                     |
+                              MongoDB: kv (state, reverse index, session snapshots)
                                        checkpoints (thread lineage, crash recovery)
-                                       agent_memory (vector/keyword recall)
+                                       agent_memory (vector / keyword recall)
                                        locks · events · pubsub (capped, tailed)
 ```
+
+Shipped vs next Atlas features (Search, hybrid `$rankFusion`, schema validation, transactions, time series `case_beats`, change streams, Stream Processing) are in `README.md` → **What else MongoDB can add here**. Do not add a second database.
 
 ### `server/mongo.ts` — the state layer
 

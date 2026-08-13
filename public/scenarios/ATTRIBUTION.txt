@@ -1,0 +1,52 @@
+Scenario scene doodles — generated assets matching the persona doodle
+visual language (black-and-white minimalist line art, thick uniform
+outlines, solid black fills, no shading). Not sourced from icoon.co.
+
+Rendered as scenario-card avatars by ui/src/components/Avatars.tsx
+(ScenarioAvatar / ScenarioIdentity). Selection / overrides live in
+ui/src/lib/scenarioPrefs.ts.
+
+Indices 01–12 are behavioural / claim-cause scenes; 13–40 are insurance
+LOB and extended auto / claim-type icons.
+
+file            scene
+scene-01.jpg    rear-end / two cars colliding
+scene-02.jpg    car theft (empty spot / broken window)
+scene-03.jpg    injury after crash
+scene-04.jpg    phone hangup / dropped call
+scene-05.jpg    locked document (PII / privacy)
+scene-06.jpg    consent refusal / declining
+scene-07.jpg    broken wrench (tool failure)
+scene-08.jpg    phone + claim form (happy-path FNOL)
+scene-09.jpg    calendar / DOB verification
+scene-10.jpg    headset / phone interview
+scene-11.jpg    warning triangle (generic negative)
+scene-12.jpg    clipboard (generic scenario fallback)
+scene-13.jpg    personal auto (sedan)
+scene-14.jpg    homeowners (house)
+scene-15.jpg    commercial auto (box truck / fleet)
+scene-16.jpg    fire damage
+scene-17.jpg    water / flood damage
+scene-18.jpg    storm / hail / weather
+scene-19.jpg    workers compensation (hard hat)
+scene-20.jpg    general liability / slip-and-fall
+scene-21.jpg    glass / windshield
+scene-22.jpg    hit-and-run
+scene-23.jpg    towing / roadside
+scene-24.jpg    policy / coverage (shield + card)
+scene-25.jpg    commercial property (building)
+scene-26.jpg    motorcycle
+scene-27.jpg    animal strike (car + deer)
+scene-28.jpg    parking lot fender-bender
+scene-29.jpg    pedestrian strike
+scene-30.jpg    vandalism (keyed / scratched car)
+scene-31.jpg    rental car
+scene-32.jpg    photo evidence upload
+scene-33.jpg    claim filed success
+scene-34.jpg    ambulance / emergency medical
+scene-35.jpg    multi-car pileup
+scene-36.jpg    single-vehicle (tree / guardrail)
+scene-37.jpg    witness
+scene-38.jpg    night-time accident
+scene-39.jpg    total loss / totaled car
+scene-40.jpg    police report

@@ -1,0 +1,55 @@
+Doodle character portraits — licensed from icoon.co
+(collection: doodle-character-illustrations). Licensed use confirmed by project owner.
+Rendered as persona avatars by ui/src/components/Avatars.tsx (PersonaAvatar).
+
+file            source-url
+doodle-01.jpg   https://framerusercontent.com/images/05pcPaQIP4zeUJEnpl41LFtvv2U.jpg
+doodle-02.jpg   https://framerusercontent.com/images/09A4iC0ERVcmIC34YMVggGAOYQ.jpg
+doodle-03.jpg   https://framerusercontent.com/images/12WRs1MPSAZDBnYw34m62UWgrY.jpg
+doodle-04.jpg   https://framerusercontent.com/images/2dRk98LY2fDrYTyBy4lhydVyyM.jpg
+doodle-05.jpg   https://framerusercontent.com/images/2r7UTOnkmRbql2kBLxlkw3cwE.jpg
+doodle-06.jpg   https://framerusercontent.com/images/3Y1mBL33BI3jbmnDNVAyVDnod8.jpg
+doodle-07.jpg   https://framerusercontent.com/images/6BkCqhCs7BWx5LUMI8dBjCpss.jpg
+doodle-08.jpg   https://framerusercontent.com/images/6YhiK9NAwlhEGTgkh2hTqBYBnGg.jpg
+doodle-09.jpg   https://framerusercontent.com/images/7jSYhYzx2cfvwatRb8uCZsYubHU.jpg
+doodle-10.jpg   https://framerusercontent.com/images/7RD8yKoT4CdctQI92RWzYFoDo4g.jpg
+doodle-11.jpg   https://framerusercontent.com/images/87Nuu55MBN6D6k97jSAP804hOc.jpg
+doodle-12.jpg   https://framerusercontent.com/images/8DNhCKOcGOCMk9htXjxPZAkZ0.jpg
+doodle-13.jpg   https://framerusercontent.com/images/8HuII2kq21QjuujU9TBXNdPrA.jpg
+doodle-14.jpg   https://framerusercontent.com/images/8p3Z9MRTm42VuIg4oIffOFmRC8.jpg
+doodle-15.jpg   https://framerusercontent.com/images/arEuebaCZ4Iz3dP4KvavKqg5cr4.jpg
+doodle-16.jpg   https://framerusercontent.com/images/azgVF48xxCJAnwc8whfF5Qo.jpg
+doodle-17.jpg   https://framerusercontent.com/images/Bqu3DVGVi5BIjn9jiLzmtdL03g.jpg
+doodle-18.jpg   https://framerusercontent.com/images/bVOdc4FqivC2pIwu1Rv7MfQdTw.jpg
+doodle-19.jpg   https://framerusercontent.com/images/cXUufPXU6463JbD5AkSvXvrUHg.jpg
+doodle-20.jpg   https://framerusercontent.com/images/f7LAkmcGD1m1Y8W4uoqvkiyM.jpg
+doodle-21.jpg   https://framerusercontent.com/images/faOn8cTaTZh5RvymmPMB8umUwDc.jpg
+doodle-22.jpg   https://framerusercontent.com/images/FNCxwfZZWMgiZOVb2bO4MuxtVE.jpg
+doodle-23.jpg   https://framerusercontent.com/images/GBD9pb3OYgTjPvpTAId7Zz8Dok.jpg
+doodle-24.jpg   https://framerusercontent.com/images/GCuG9zctLBS40ETGn1csZArTY.jpg
+doodle-25.jpg   https://framerusercontent.com/images/gdtpykgUkdWcbVXtMetMOs5sE.jpg
+doodle-26.jpg   https://framerusercontent.com/images/gUzK0W7Hfr4NRFawULBknA39Hd8.jpg
+doodle-27.jpg   https://framerusercontent.com/images/HT3toyNxu2q7Ar6GrvGOKYd2ZOI.jpg
+doodle-28.jpg   https://framerusercontent.com/images/IFMnqP7SIY6TSqsP486SqYznU.jpg
+doodle-29.jpg   https://framerusercontent.com/images/j3Cg5DYMxUyX2GabBxExqkpoHso.jpg
+doodle-30.jpg   https://framerusercontent.com/images/jgytv9W7v34W8Ye8Vt8ESRAHk.jpg
+doodle-31.jpg   https://framerusercontent.com/images/JICosfjCWEXAat4iXsfGc4HercA.jpg
+doodle-32.jpg   https://framerusercontent.com/images/Kq2H5K0A0CIQOOL7XpSheqszEeU.jpg
+doodle-33.jpg   https://framerusercontent.com/images/lkcLBimBbYXTQlVn8lOJIDlxNY.jpg
+doodle-34.jpg   https://framerusercontent.com/images/Lv2Slzqdu9sufPLdm69nnLXb0zc.jpg
+doodle-35.jpg   https://framerusercontent.com/images/m9NKz4wxRME0lyZ2H7SSeucLB7Y.jpg
+doodle-36.jpg   https://framerusercontent.com/images/mJh8tuJZO07ZXJDwQLKOQO0Spg.jpg
+doodle-37.jpg   https://framerusercontent.com/images/qcLw4Mxvhzb2U2n337Cq6ze74mw.jpg
+doodle-38.jpg   https://framerusercontent.com/images/qgRAn5HKyGql10lnuMkgglT5V8w.jpg
+doodle-39.jpg   https://framerusercontent.com/images/s0xWNQ1uCrhAq8rzXeRGuDwEyAY.jpg
+doodle-40.jpg   https://framerusercontent.com/images/s86a79BwsiwMOjhkjhlqV3Tq508.jpg
+doodle-41.jpg   https://framerusercontent.com/images/s9qILLPnTabTW9CVlvVyky3FM.jpg
+doodle-42.jpg   https://framerusercontent.com/images/tMIPiFrWzjeJGRpoIMCGKyysg4U.jpg
+doodle-43.jpg   https://framerusercontent.com/images/udCBO3CN7jV4kBJkkoM6jqk7MxE.jpg
+doodle-44.jpg   https://framerusercontent.com/images/Uk0KC9B4ZcurJZhTYsAJfwSDTBQ.jpg
+doodle-45.jpg   https://framerusercontent.com/images/V1aa3OmXK0C6X3Q1JN5zqKW7pfo.jpg
+doodle-46.jpg   https://framerusercontent.com/images/vSVqv2ZqYTFwIOMFiwO39Asl7A.jpg
+doodle-47.jpg   https://framerusercontent.com/images/wBkzR67RzTjJT2lTS4SUkTDamTA.jpg
+doodle-48.jpg   https://framerusercontent.com/images/y9cweonUOnJqRx1oaxSavsPULQA.jpg
+doodle-49.jpg   https://framerusercontent.com/images/YobdafVOKtbH656r5rl8uWzqns.jpg
+doodle-50.jpg   https://framerusercontent.com/images/yozewbLZcRfz4YO5yazfsLGuHik.jpg

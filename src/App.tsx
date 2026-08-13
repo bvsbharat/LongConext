@@ -22,6 +22,7 @@ import { ClaimTimeline } from './components/ClaimTimeline';
 import { ClaimList } from './components/ClaimList';
 import { MongoDashboard } from './components/MongoDashboard';
 import { BottomDock, type LayoutWidth } from './components/BottomDock';
+import { MongoLeaf } from './components/MongoLeaf';
 import {
   Database,
   ArrowRight,
@@ -38,13 +39,13 @@ const LAYOUT_WIDTH_OPTIONS: {
 }[] = [
   {
     id: 'comfortable',
-    mainClass: 'max-w-[1400px]',
-    pagePad: 'px-4 sm:px-6 md:px-10 lg:px-16',
+    mainClass: 'max-w-[1680px]',
+    pagePad: 'px-4 sm:px-6 md:px-8 lg:px-10',
   },
   {
     id: 'wide',
-    mainClass: 'max-w-[1760px]',
-    pagePad: 'px-3 sm:px-5 md:px-6 lg:px-8',
+    mainClass: 'max-w-[2200px]',
+    pagePad: 'px-3 sm:px-4 md:px-6 lg:px-8',
   },
   {
     id: 'stretch',
@@ -408,13 +409,28 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen bg-mdb-black text-mdb-fog antialiased flex flex-col items-center pt-8 ${layout.pagePad}`}
+      className={`min-h-screen bg-mdb-canvas text-mdb-ink antialiased flex flex-col items-center pt-8 ${layout.pagePad}`}
     >
+      <header className={`w-full ${layout.mainClass} flex items-center pb-3`}>
+        <button
+          type="button"
+          onClick={goHome}
+          className="brand-logo"
+          aria-label="ConquerContext home"
+        >
+          <MongoLeaf className="brand-logo-mark" title="ConquerContext" />
+          <h1 className="brand-logo-word">
+            <span className="brand-logo-conquer">Conquer</span>
+            <span className="brand-logo-context">Context</span>
+          </h1>
+        </button>
+      </header>
+
       <main className={`w-full ${layout.mainClass} flex flex-col gap-8 pb-28`}>
         {page === 'mongo' ? (
           <div className="w-full flex flex-col gap-4 animate-in fade-in duration-300">
             <div className="flex flex-col gap-1">
-              <h2 className="text-2xl font-semibold text-mdb-fog tracking-tight font-display">MongoDB memory &amp; state</h2>
+              <h2 className="text-2xl font-semibold text-mdb-ink tracking-tight font-display">MongoDB memory &amp; state</h2>
               <p className="text-sm text-mdb-slate">
                 Claim state, long-term agent memory, the checkpoint lineage, pub/sub, and command
                 logs.
@@ -448,84 +464,30 @@ export default function App() {
             approveError={approveError}
           />
         ) : (
-          <div className="flex flex-col gap-12 w-full items-center">
+          <div className="flex flex-col gap-8 w-full">
             <ClaimList
               claims={templates}
               onSelectClaim={loadClaim}
             />
 
-            {sessions.length > 0 && (
-              <div className="w-full max-w-5xl flex flex-col gap-3">
-                <div className="flex flex-col gap-1">
-                  <h3 className="text-xl font-bold text-mdb-fog flex items-center gap-2 font-display">
-                    <History className="size-5 text-mdb-leaf" />
-                    Saved interactions
-                  </h3>
-                  <p className="text-sm text-mdb-slate">
-                    Full claim sessions survive refresh. Resume to continue where you left off.
-                  </p>
-                </div>
-                <div className="bg-mdb-card rounded-2xl border border-mdb-border overflow-hidden divide-y divide-mdb-border">
-                  {sessions.slice(0, 12).map(session => (
-                    <div
-                      key={session.sessionId}
-                      className="flex items-center justify-between gap-4 px-5 py-3.5 hover:bg-mdb-forest/20"
-                    >
-                      <div className="min-w-0 flex flex-col gap-0.5">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-semibold text-mdb-fog">
-                            {session.claimantName}
-                          </span>
-                          <span className="font-mono text-[11px] text-mdb-slate">{session.claimId}</span>
-                          <span className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-mdb-spruce text-mdb-mint border border-mdb-border">
-                            {session.endReason}
-                          </span>
-                        </div>
-                        <p className="text-[12px] text-mdb-slate truncate">
-                          {session.claimType} · step {Math.min(session.currentStepIndex + 1, session.stepCount)}/
-                          {session.stepCount} · {session.status} ·{' '}
-                          {new Date(session.updatedAt).toLocaleString()}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => resumeSession(session.sessionId)}
-                        disabled={loading}
-                        aria-label={`Resume session for ${session.claimantName}`}
-                        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold
-                          bg-mdb-leaf text-mdb-black hover:bg-mdb-mint disabled:opacity-50 transition"
-                      >
-                        Resume
-                        <ArrowRight className="size-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Compact home console — full MongoDB UI lives on /#/mongo */}
-            <div className="w-full max-w-5xl flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex flex-col gap-1">
-                  <h3 className="text-xl font-bold text-mdb-fog flex items-center gap-2 font-display">
-                    <Activity className="size-5 text-mdb-leaf" />
-                    Live System Events
-                  </h3>
-                  <p className="text-sm text-mdb-slate">Recent activity — open MongoDB for full context.</p>
-                </div>
+                <h3 className="font-bold text-mdb-ink flex items-center gap-2 text-sm tracking-tight">
+                  <Activity className="size-4 text-mdb-forest" />
+                  Live System Events
+                </h3>
                 <button
                   type="button"
                   onClick={goMongo}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-mdb-border text-sm font-medium text-mdb-fog hover:bg-mdb-forest/30 hover:border-mdb-leaf/40 transition"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-mdb-border bg-mdb-card text-sm font-medium text-mdb-ink hover:bg-mdb-mint hover:border-mdb-forest/30 transition"
                 >
-                  <Database className="size-4 text-mdb-leaf" />
+                  <Database className="size-4 text-mdb-forest" />
                   Open MongoDB page
                 </button>
               </div>
 
-              <div className="rounded-xl border border-mdb-border bg-mdb-black shadow-lg overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-2 border-b border-mdb-border bg-mdb-spruce/80">
+              <div className="rounded-2xl border border-mdb-border bg-mdb-black overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-2 border-b border-white/10 bg-[#023430]">
                   <span className="size-2.5 rounded-full bg-red-500/80" />
                   <span className="size-2.5 rounded-full bg-amber-400/80" />
                   <span className="size-2.5 rounded-full bg-mdb-leaf" />
@@ -557,6 +519,48 @@ export default function App() {
                 </div>
               </div>
             </div>
+
+            {sessions.length > 0 && (
+              <div className="flex flex-col gap-4">
+                <h3 className="font-bold text-mdb-ink flex items-center gap-2 text-sm tracking-tight">
+                  <History className="size-4 text-mdb-forest" />
+                  Saved interactions
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {sessions.slice(0, 12).map(session => (
+                    <div
+                      key={session.sessionId}
+                      className="bg-mdb-elevated rounded-2xl p-4 border border-mdb-border flex flex-col gap-3"
+                    >
+                      <div className="flex items-center justify-between border-b border-mdb-border pb-2.5">
+                        <span className="text-[13px] text-mdb-slate">Session</span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium text-mdb-forest border border-mdb-border bg-white">
+                          {session.endReason}
+                        </span>
+                      </div>
+                      <h3 className="font-semibold text-mdb-ink leading-snug text-[14px] tracking-tight">
+                        {session.claimantName}
+                      </h3>
+                      <p className="text-[12px] text-mdb-slate">
+                        {session.claimId} · {session.claimType} · step{' '}
+                        {Math.min(session.currentStepIndex + 1, session.stepCount)}/{session.stepCount}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => resumeSession(session.sessionId)}
+                        disabled={loading}
+                        aria-label={`Resume session for ${session.claimantName}`}
+                        className="self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold
+                          bg-mdb-forest text-white hover:bg-mdb-black disabled:opacity-50 transition"
+                      >
+                        Resume
+                        <ArrowRight className="size-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>

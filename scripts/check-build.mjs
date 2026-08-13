@@ -21,7 +21,7 @@ if (!existsSync(join(root, 'dist', 'server.cjs'))) {
   console.error(`\n${line}`);
   console.error('  Nothing to start: dist/server.cjs has not been built.\n');
   console.error('  For local development you almost certainly want:\n');
-  console.error('      npm run dev            # API + UI on http://localhost:3000');
+  console.error('      npm run dev            # API + UI on http://localhost:3001');
   console.error('                             # one process, one port -- no separate client\n');
   console.error('  `npm run start` only serves a production build. If that is what you want:\n');
   console.error('      npm run build && npm run start\n');

@@ -75,22 +75,22 @@ const REPLY_SOURCE_META: Record<
   inbound: {
     label: 'Real reply received',
     Icon: CheckCircle2,
-    pill: 'bg-mdb-forest/30 text-mdb-leaf border-mdb-leaf/30',
+    pill: 'bg-mdb-mint text-mdb-forest border-mdb-forest/20',
   },
   synthesized: {
     label: 'Synthesized — not a real reply',
     Icon: Sparkles,
-    pill: 'bg-amber-950/40 text-amber-300 border-amber-700/40',
+    pill: 'bg-amber-50 text-amber-800 border-amber-200',
   },
   fixture: {
     label: 'Sample dialogue — never sent',
     Icon: FileText,
-    pill: 'bg-mdb-elevated text-mdb-slate border-mdb-border',
+    pill: 'bg-white text-mdb-ink border-mdb-border',
   },
   unknown: {
     label: 'Unverified — not a confirmed reply',
     Icon: Circle,
-    pill: 'bg-mdb-elevated text-mdb-slate border-mdb-border',
+    pill: 'bg-white text-mdb-ink border-mdb-border',
   },
 };
 
@@ -190,39 +190,54 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
       : Math.min(100, Math.max(0, (completedCount / (stepCount - 1)) * 100));
   const trackInsetPct = 100 / (stepCount * 2);
 
-  // Style mapping helper for active/completed sub-steps
+  // Leaf (#00ED64) is only for dark chips. Body copy on light cards is ink so it stays readable.
+  const badgeOnDark =
+    'inline-flex w-max px-2 py-0.5 rounded-full text-[11px] font-medium tracking-tight bg-mdb-black text-mdb-leaf border border-mdb-leaf/40';
+  const descInk = 'text-mdb-ink text-[13px] leading-snug';
+
   const getSubStepStyles = (sub: SubStep) => {
     const isOutcome = sub.type === 'outcome' || sub.systemName.toLowerCase() === 'outcome';
+    const looksEmail = /\be-?mails?\b|\binbox\b|\bmailbox\b/i.test(
+      `${sub.techType ?? ''} ${sub.systemName} ${sub.description}`
+    );
 
     if (isOutcome) {
       return {
-        container: 'bg-mdb-forest border border-mdb-forest rounded-xl p-3.5 flex flex-col gap-2',
-        badge: 'inline-flex w-max px-2 py-0.5 rounded-full text-[11px] font-medium tracking-tight bg-transparent text-mdb-mint border border-white/20',
+        container: 'bg-mdb-forest border border-mdb-forest rounded-xl p-3.5 flex flex-col gap-2 text-white',
+        badge: 'inline-flex w-max px-2 py-0.5 rounded-full text-[11px] font-medium tracking-tight bg-mdb-black text-mdb-leaf border border-mdb-leaf/40',
         desc: 'text-white text-[13px] leading-snug',
+      };
+    }
+
+    if (looksEmail) {
+      return {
+        container: 'bg-white border border-mdb-border rounded-xl p-3.5 flex flex-col gap-2',
+        badge: badgeOnDark,
+        desc: descInk,
       };
     }
 
     switch (sub.type) {
       case 'horizon':
         return {
-          container: 'bg-mdb-elevated border border-mdb-leaf/20 rounded-xl p-3.5 flex flex-col gap-2',
-          badge: 'inline-flex w-max px-2 py-0.5 rounded-full text-[11px] font-medium tracking-tight bg-mdb-black text-mdb-leaf border border-mdb-leaf/30',
-          desc: 'text-mdb-mint text-[13px] leading-snug',
+          container: 'bg-white border border-mdb-border rounded-xl p-3.5 flex flex-col gap-2',
+          badge: badgeOnDark,
+          desc: descInk,
         };
       case 'phone':
       case 'sms':
         return {
-          container: 'bg-mdb-forest/20 border border-mdb-leaf/25 rounded-xl p-3.5 flex flex-col gap-2',
-          badge: `inline-flex w-max px-2 py-0.5 rounded-full text-[11px] font-medium tracking-tight bg-mdb-black text-mdb-leaf border border-mdb-leaf/30`,
-          desc: 'text-mdb-leaf text-[13px] leading-snug',
+          container: 'bg-[#E3FCF7] border border-mdb-forest/20 rounded-xl p-3.5 flex flex-col gap-2',
+          badge: badgeOnDark,
+          desc: descInk,
         };
       case 'api':
       case 'tool':
       default:
         return {
-          container: 'bg-mdb-spruce/60 border border-mdb-mint/20 rounded-xl p-3.5 flex flex-col gap-2',
-          badge: 'inline-flex w-max px-2 py-0.5 rounded-full text-[11px] font-medium tracking-tight bg-mdb-black text-mdb-mint border border-mdb-mint/25',
-          desc: 'text-mdb-mint text-[13px] leading-snug',
+          container: 'bg-mdb-elevated border border-mdb-border rounded-xl p-3.5 flex flex-col gap-2',
+          badge: badgeOnDark,
+          desc: descInk,
         };
     }
   };
@@ -236,7 +251,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="bg-amber-950/40 border border-amber-700/40 rounded-2xl px-5 py-4 flex items-center justify-between gap-4"
+            className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-center justify-between gap-4"
             id="awaiting-reply-banner"
           >
             <div className="flex items-center gap-3">
@@ -245,11 +260,11 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
               </span>
               <div className="flex flex-col gap-0.5">
-                <span className="text-[13px] font-semibold text-amber-200 tracking-tight flex items-center gap-1.5">
-                  {WaitChannelIcon && <WaitChannelIcon className="size-3.5 text-amber-300" />}
+                <span className="text-[13px] font-semibold text-amber-900 tracking-tight flex items-center gap-1.5">
+                  {WaitChannelIcon && <WaitChannelIcon className="size-3.5 text-amber-700" />}
                   {CHANNEL_COPY[awaiting.channel].waiting}
                 </span>
-                <span className="text-[12px] text-amber-200/80 leading-snug">
+                <span className="text-[12px] text-amber-800/80 leading-snug">
                   {CHANNEL_COPY[awaiting.channel].sent} to {claim.claimantName}. The agent stays on this claim and
                   advances on its own the moment {CHANNEL_COPY[awaiting.channel].resolves} — no action needed.
                 </span>
@@ -258,12 +273,12 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
 
             <div className="flex items-center gap-2 shrink-0">
               {awaiting.attempt > 1 && (
-                <span className="inline-flex w-max px-2 py-0.5 rounded-full text-[11px] font-medium tracking-tight bg-mdb-black text-amber-300 border border-amber-700/40">
+                <span className="inline-flex w-max px-2 py-0.5 rounded-full text-[11px] font-medium tracking-tight bg-white text-amber-800 border border-amber-200">
                   Attempt {awaiting.attempt}
                 </span>
               )}
               {elapsedLabel && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold tracking-tight bg-mdb-black text-amber-200 border border-amber-700/40 tabular-nums">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold tracking-tight bg-white text-amber-800 border border-amber-200 tabular-nums">
                   <Hourglass className="size-3 text-amber-600" />
                   {elapsedLabel}
                 </span>
@@ -275,7 +290,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                 onClick={onRunStep}
                 disabled={loading}
                 title="Demo/test override: skips the real wait for the inbound reply and advances the claim anyway."
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold border border-amber-600/50 text-amber-100 bg-mdb-black hover:bg-amber-950/60 disabled:opacity-50 disabled:cursor-not-allowed transition shrink-0"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold border border-amber-300 text-amber-900 bg-white hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed transition shrink-0"
               >
                 <FastForward className="size-3.5" />
                 {loading ? 'Advancing...' : 'Force Advance'}
@@ -292,7 +307,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
         {/* Card header */}
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] text-mdb-slate">For insurers</span>
-          <h2 className="text-[26px] leading-tight font-semibold text-mdb-fog tracking-tight">
+          <h2 className="text-[26px] leading-tight font-semibold text-mdb-ink tracking-tight">
             From FNOL to claim resolution
           </h2>
         </div>
@@ -336,7 +351,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
               <div key={step.id} className="flex flex-col items-center gap-3">
                 <span
                   className={`text-[13px] font-medium tracking-wide transition duration-300 ${
-                    isPending ? 'text-mdb-slate' : 'text-mdb-leaf'
+                    isPending ? 'text-mdb-slate' : 'text-mdb-forest'
                   }`}
                 >
                   {step.timeLabel}
@@ -382,7 +397,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                   {step.subSteps.map((sub) => (
                     <div
                       key={sub.id}
-                      className="bg-mdb-black/50 border border-mdb-border rounded-xl p-3.5 flex flex-col gap-2"
+                      className="bg-mdb-elevated border border-mdb-border rounded-xl p-3.5 flex flex-col gap-2"
                     >
                       <div className="h-4.5 bg-mdb-border rounded-full w-14" />
                       <div className="h-3 bg-mdb-border rounded w-[80%] mt-1" />
@@ -413,14 +428,14 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                   </span>
                   
                   {/* System Badge */}
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium text-mdb-mint border border-mdb-border bg-mdb-black">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium text-mdb-forest border border-mdb-border bg-white">
                     <Layers className="size-3 text-mdb-slate" />
                     EHR
                   </span>
                 </div>
 
                 {/* Main Headline text */}
-                <h3 className="font-semibold text-mdb-fog leading-snug text-[14px] tracking-tight">
+                <h3 className="font-semibold text-mdb-ink leading-snug text-[14px] tracking-tight">
                   {step.signal}
                 </h3>
               </div>
@@ -428,11 +443,11 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
               {/* Agent Memory — persisted context for this stage (and learned contacts) */}
               {(isActive || isCompleted) && (step.agentMemory || claim.workingMemory) && (
                 <div className="mt-3 rounded-xl border border-mdb-leaf/25 bg-mdb-forest/20 px-3.5 py-3 flex flex-col gap-1.5">
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-tight text-mdb-leaf">
-                    <Brain className="size-3.5 text-mdb-leaf" />
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-tight text-mdb-forest">
+                    <Brain className="size-3.5 text-mdb-forest" />
                     Agent Memory
                   </span>
-                  <p className="text-[12px] text-mdb-fog/90 leading-relaxed whitespace-pre-line">
+                  <p className="text-[12px] text-mdb-ink/90 leading-relaxed whitespace-pre-line">
                     {isActive && claim.workingMemory
                       ? claim.workingMemory
                       : step.agentMemory}
@@ -457,7 +472,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                       <div key={sub.id} className="relative pl-7 pb-3 opacity-45 select-none" aria-hidden="true">
                         <div className="absolute left-[18px] top-0 w-[1.5px] bg-mdb-border h-[18px]" />
                         <div className="absolute left-[18px] top-0 w-3.5 h-[18px] border-l-[1.5px] border-b-[1.5px] border-mdb-border rounded-bl-[10px] pointer-events-none" />
-                        <div className="bg-mdb-black/50 border border-mdb-border rounded-xl p-3.5 flex flex-col gap-2">
+                        <div className="bg-mdb-elevated border border-mdb-border rounded-xl p-3.5 flex flex-col gap-2">
                           <div className="h-3 bg-mdb-border rounded w-24" />
                           <div className="h-3 bg-mdb-border rounded w-[80%]" />
                         </div>
@@ -521,15 +536,15 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                         {/* Waiting-for-reply footer — intentionally parked, not stalled */}
                         {isWaiting && (
                           <div className="mt-2.5 pt-2.5 border-t border-current/10 flex items-center justify-between gap-2 flex-wrap">
-                            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-300 tracking-tight">
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-900 tracking-tight">
                               <span className="flex h-1.5 w-1.5 relative shrink-0">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500" />
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-600" />
                               </span>
                               {CHANNEL_COPY[waitChannel].waiting}
                             </span>
                             {isAwaited && elapsedLabel && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-tight bg-mdb-black text-amber-300 border border-amber-700/40 tabular-nums">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-tight bg-amber-100 text-amber-900 border border-amber-200 tabular-nums">
                                 <Clock className="size-2.5" />
                                 {elapsedLabel}
                               </span>
@@ -545,7 +560,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                               <button
                                 type="button"
                                 onClick={() => toggleChat(sub.id)}
-                                className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider hover:opacity-80 transition cursor-pointer self-start"
+                                className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-mdb-forest hover:text-mdb-ink transition cursor-pointer self-start"
                               >
                                 <MessageCircle className="size-3" />
                                 <span>{isChatOpen ? 'Hide dialogue' : 'Inspect phone/sms logs'}</span>
@@ -580,10 +595,10 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                                         }`}
                                       >
                                         {/* Sender Label name */}
-                                        <div className="flex items-center gap-1 text-[9px] font-bold text-mdb-slate uppercase tracking-tight">
+                                        <div className="flex items-center gap-1 text-[9px] font-bold text-mdb-ink uppercase tracking-tight">
                                           {isAgent ? (
                                             <>
-                                              <Sparkles className="size-2.5 text-mdb-leaf animate-pulse" />
+                                              <Sparkles className="size-2.5 text-mdb-forest animate-pulse" />
                                               <span>Agent</span>
                                             </>
                                           ) : (
@@ -601,8 +616,8 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                                           dialogueIsReal ? '' : 'border-dashed '
                                         }${
                                           isAgent
-                                            ? 'bg-mdb-forest/30 border-mdb-leaf/20 text-mdb-fog rounded-tl-none'
-                                            : 'bg-mdb-black border-mdb-border text-mdb-fog rounded-tr-none'
+                                            ? 'bg-mdb-mint border-mdb-forest/20 text-mdb-ink rounded-tl-none'
+                                            : 'bg-white border-mdb-border text-mdb-ink rounded-tr-none'
                                         }`}>
                                           {msg.text}
                                         </div>
@@ -628,8 +643,8 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
 
       {/* Active Agent Events / Memory Log */}
       <div className="mt-8 flex flex-col gap-4">
-        <h3 className="font-bold text-mdb-fog flex items-center gap-2 text-sm tracking-tight">
-          <Sparkles className="size-4 text-mdb-leaf" />
+        <h3 className="font-bold text-mdb-ink flex items-center gap-2 text-sm tracking-tight">
+          <Sparkles className="size-4 text-mdb-forest" />
           Agent Reasoning Log
         </h3>
         <div className={`grid ${gridColsClass} gap-4`}>
@@ -651,7 +666,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                 <div className="flex items-center justify-between">
                   <span
                     className={`text-[11px] font-bold tracking-wider uppercase ${
-                      isActive ? 'text-mdb-leaf' : isPending ? 'text-mdb-slate' : 'text-mdb-slate'
+                      isActive ? 'text-mdb-forest' : isPending ? 'text-mdb-slate' : 'text-mdb-slate'
                     }`}
                   >
                     {step.timeLabel}
@@ -669,7 +684,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                     <div className="h-2.5 bg-mdb-border rounded w-[60%]" />
                   </div>
                 ) : (
-                  <p className="text-[13px] text-mdb-fog/85 leading-relaxed font-sans whitespace-pre-line">
+                  <p className="text-[13px] text-mdb-ink/85 leading-relaxed font-sans whitespace-pre-line">
                     {isActive && claim.workingMemory ? claim.workingMemory : step.agentMemory}
                   </p>
                 )}
@@ -686,21 +701,21 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="mt-6 border border-amber-700/40 bg-amber-950/30 rounded-2xl p-6"
+            className="mt-6 border border-amber-200 bg-amber-50 rounded-2xl p-6"
             id="payout-approval-panel"
           >
-            <div className="flex items-center gap-2 mb-1 text-amber-200">
-              <ShieldAlert className="size-6 text-amber-400 fill-amber-900/40" />
+            <div className="flex items-center gap-2 mb-1 text-amber-900">
+              <ShieldAlert className="size-6 text-amber-600 fill-amber-100" />
               <h3 className="text-lg font-bold tracking-tight">Adjuster Sign-off Required</h3>
             </div>
-            <p className="text-[13px] text-amber-200/80 leading-relaxed mb-5 max-w-3xl">
+            <p className="text-[13px] text-amber-800/80 leading-relaxed mb-5 max-w-3xl">
               The agent has finished working this claim and drafted a settlement. Payment is held here for human review
               — an adjuster must sign off before any funds leave the account.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               {/* What exactly is being approved */}
-              <div className="bg-mdb-card rounded-xl p-5 border border-amber-700/40 flex flex-col gap-3">
+              <div className="bg-white rounded-xl p-5 border border-amber-200 flex flex-col gap-3">
                 <h4 className="text-xs font-bold text-mdb-slate uppercase tracking-wider">
                   Under Review
                 </h4>
@@ -708,35 +723,35 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                 <div className="flex flex-col divide-y divide-mdb-border">
                   <div className="flex items-center justify-between py-2">
                     <span className="text-[12px] text-mdb-slate">Claimant</span>
-                    <span className="text-[13px] font-semibold text-mdb-fog">{claim.claimantName}</span>
+                    <span className="text-[13px] font-semibold text-mdb-ink">{claim.claimantName}</span>
                   </div>
                   <div className="flex items-center justify-between py-2">
                     <span className="text-[12px] text-mdb-slate">Claim / Policy</span>
-                    <span className="text-[12px] font-mono text-mdb-mint">{claim.id} · {claim.policyNumber}</span>
+                    <span className="text-[12px] font-mono text-mdb-forest">{claim.id} · {claim.policyNumber}</span>
                   </div>
 
                   {/* Settlement arithmetic, spelled out so the total is never unexplained */}
                   <div className="flex items-center justify-between py-2">
                     <span className="text-[12px] text-mdb-slate">Claim amount</span>
-                    <span className="text-[13px] font-mono text-mdb-mint tabular-nums">
+                    <span className="text-[13px] font-mono text-mdb-forest tabular-nums">
                       {formatUsd(claim.claimAmount)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between py-2">
                     <span className="text-[12px] text-mdb-slate">Less deductible</span>
-                    <span className="text-[13px] font-mono text-mdb-mint tabular-nums">
+                    <span className="text-[13px] font-mono text-mdb-forest tabular-nums">
                       {deductible !== undefined ? `−${formatUsd(deductible)}` : 'Not itemized'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between py-2.5 border-t-2 border-mdb-border">
-                    <span className="text-[12px] font-semibold text-mdb-fog">Net payout</span>
+                    <span className="text-[12px] font-semibold text-mdb-ink">Net payout</span>
                     {payoutUnknown ? (
                       <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-red-700">
                         <AlertTriangle className="size-3.5" />
                         Could not be determined
                       </span>
                     ) : (
-                      <span className="text-[15px] font-mono font-bold text-amber-200 tabular-nums">
+                      <span className="text-[15px] font-mono font-bold text-mdb-forest tabular-nums">
                         {formatUsd(payoutAmount)}
                       </span>
                     )}
@@ -745,7 +760,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
               </div>
 
               {/* Deliberate two-stage approval action */}
-              <div className="bg-mdb-card rounded-xl p-5 border border-amber-700/40 flex flex-col justify-between h-full gap-4">
+              <div className="bg-white rounded-xl p-5 border border-amber-200 flex flex-col justify-between h-full gap-4">
                 <div className="flex flex-col gap-2">
                   <h4 className="text-xs font-bold text-mdb-slate uppercase tracking-wider">
                     Release Settlement
@@ -758,9 +773,9 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                 </div>
 
                 {approveError && (
-                  <div className="bg-red-950/40 border border-red-800/50 rounded-xl px-3.5 py-2.5 flex items-start gap-2">
+                  <div className="bg-red-50 border border-red-200 rounded-xl px-3.5 py-2.5 flex items-start gap-2">
                     <AlertTriangle className="size-4 text-red-600 shrink-0 mt-px" />
-                    <p className="text-[12px] text-red-300 leading-snug break-words">{approveError}</p>
+                    <p className="text-[12px] text-red-700 leading-snug break-words">{approveError}</p>
                   </div>
                 )}
 
@@ -773,7 +788,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                       exit={{ opacity: 0, y: -6 }}
                       className="flex flex-col gap-2.5"
                     >
-                      <p className="text-[12px] font-semibold text-amber-200 leading-snug">
+                      <p className="text-[12px] font-semibold text-amber-900 leading-snug">
                         Confirm sign-off as the reviewing adjuster —{' '}
                         {isAmount(payoutAmount) ? formatUsd(payoutAmount) : 'an undetermined amount'} to{' '}
                         {claim.claimantName}.
@@ -805,7 +820,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                           type="button"
                           onClick={() => setConfirmingPayout(false)}
                           disabled={approving}
-                          className="px-3 py-2 rounded-lg text-sm font-medium text-mdb-slate hover:text-mdb-fog hover:bg-mdb-elevated transition disabled:cursor-not-allowed"
+                          className="px-3 py-2 rounded-lg text-sm font-medium text-mdb-slate hover:text-mdb-ink hover:bg-mdb-elevated transition disabled:cursor-not-allowed"
                         >
                           Cancel
                         </button>
@@ -846,7 +861,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
             className="mt-6 border border-mdb-leaf/30 bg-mdb-forest/15 rounded-2xl p-6"
             id="resolution-payout-panel"
           >
-            <div className="flex items-center gap-2 mb-4 text-mdb-mint">
+            <div className="flex items-center gap-2 mb-4 text-mdb-forest">
               <ShieldCheck className="size-6 text-mdb-leaf fill-mdb-forest" />
               <h3 className="text-lg font-bold tracking-tight">SmartAgent Settlement Resolution Approved</h3>
             </div>
@@ -858,13 +873,13 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                   <h4 className="text-xs font-bold text-mdb-slate uppercase tracking-wider mb-2">
                     Settlement Narrative & Justification
                   </h4>
-                  <p className="text-sm text-mdb-fog/85 leading-relaxed italic mb-4">
+                  <p className="text-sm text-mdb-ink/85 leading-relaxed italic mb-4">
                     "{claim.resolutionCheck.resolutionText}"
                   </p>
                   
                   <div className="bg-mdb-forest/20 border border-mdb-leaf/25 rounded-xl p-3.5 flex items-center gap-2.5 mt-2">
                     <Phone className="size-4 text-mdb-leaf shrink-0" />
-                    <div className="text-[11px] text-mdb-mint font-sans">
+                    <div className="text-[11px] text-mdb-forest font-sans">
                       <span className="font-semibold block">Need resolution support or payout updates?</span>
                       Call our dedicated hotline: <a href="tel:+12246598896" className="font-bold underline hover:text-mdb-leaf">+1-224-659-8896</a>
                     </div>
@@ -877,7 +892,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
               </div>
 
               {/* Physical check layout print */}
-              <div className="bg-mdb-elevated border border-mdb-border rounded-xl p-5 font-mono text-mdb-fog text-xs flex flex-col justify-between border-l-4 border-l-amber-600 relative overflow-hidden h-full">
+              <div className="bg-mdb-elevated border border-mdb-border rounded-xl p-5 font-mono text-mdb-ink text-xs flex flex-col justify-between border-l-4 border-l-amber-600 relative overflow-hidden h-full">
                 {/* Background watermarks */}
                 <div className="absolute inset-0 select-none opacity-2 flex items-center justify-center font-bold text-4xl uppercase pointer-events-none rotate-12">
                   INSURANCE DISBURSEMENT
@@ -885,7 +900,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
 
                 <div className="flex justify-between items-start mb-4 relative">
                   <div>
-                    <h4 className="font-bold text-[10px] tracking-wide uppercase text-amber-200">
+                    <h4 className="font-bold text-[10px] tracking-wide uppercase text-amber-900">
                       SMARTAGENT CASUALTY CORP
                     </h4>
                     <p className="text-[8px] text-mdb-slate">100 CLOUD RUN WAY, PLATFORM CITY</p>
@@ -899,7 +914,7 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                 <div className="border-y border-amber-950/15 py-3.5 my-1.5 flex justify-between items-center relative">
                   <div className="flex-1">
                     <span className="text-[8px] text-mdb-slate block">PAY TO THE ORDER OF:</span>
-                    <span className="font-bold text-sm tracking-tight text-mdb-fog">{claim.resolutionCheck.payTo}</span>
+                    <span className="font-bold text-sm tracking-tight text-mdb-ink">{claim.resolutionCheck.payTo}</span>
                   </div>
                   <div className="bg-mdb-black border border-mdb-leaf/30 px-3 py-1.5 rounded font-bold text-sm text-mdb-leaf">
                     ${claim.resolutionCheck.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -909,10 +924,10 @@ export const ClaimTimeline: React.FC<ClaimTimelineProps> = ({
                 <div className="flex justify-between items-end mt-4 pt-2 relative">
                   <div>
                     <span className="text-[8px] text-mdb-slate block">MEMO:</span>
-                    <span className="font-bold text-mdb-fog">{claim.resolutionCheck.memo}</span>
+                    <span className="font-bold text-mdb-ink">{claim.resolutionCheck.memo}</span>
                   </div>
                   <div className="text-right border-t border-mdb-border pt-1.5 w-1/3">
-                    <span className="font-bold text-[10px] italic text-amber-200 block font-serif">
+                    <span className="font-bold text-[10px] italic text-amber-800 block font-serif">
                       {claim.resolutionCheck.signature}
                     </span>
                     <span className="text-[7px] text-mdb-slate uppercase">AUTHORIZED SIGNATURE</span>

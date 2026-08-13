@@ -1,7 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Code+Pro:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
-/* MongoDB Atlas / Compass dark — evergreen black, forest #00684A, leaf #00ED64 */
+/* MongoDB LeafyGreen light — canvas #F9FBFA, ink #001E2B, spruce #00684A, leaf #00ED64 */
 @theme {
   --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
@@ -14,19 +13,20 @@
   --color-mongo-leaf: #00ed64;
   --color-mongo-mint: #c0fae6;
   --color-mongo-fog: #e8edeb;
-  --color-mongo-slate: #889397;
+  --color-mongo-slate: #5c6c75;
 
   --color-mdb-black: #001e2b;
-  --color-mdb-spruce: #023430;
+  --color-mdb-ink: #001e2b;
+  --color-mdb-spruce: #00684a;
   --color-mdb-forest: #00684a;
   --color-mdb-leaf: #00ed64;
-  --color-mdb-mint: #c0fade;
+  --color-mdb-mint: #c0fae6;
   --color-mdb-fog: #e8edeb;
-  --color-mdb-slate: #889397;
-  --color-mdb-card: #0c2a35;
-  --color-mdb-elevated: #16343f;
-  --color-mdb-border: #1c4a4a;
-  --color-mdb-canvas: #001e2b;
+  --color-mdb-slate: #5c6c75;
+  --color-mdb-card: #ffffff;
+  --color-mdb-elevated: #f4f6f6;
+  --color-mdb-border: #e8edeb;
+  --color-mdb-canvas: #f9fbfa;
 }
 
 :root {
@@ -36,11 +36,15 @@
   --mongo-leaf: #00ed64;
   --mongo-mint: #c0fae6;
   --mongo-fog: #e8edeb;
-  --mongo-slate: #889397;
+  --mongo-slate: #5c6c75;
+  --mdb-canvas: #f9fbfa;
+  --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
+  --font-mono: "Source Code Pro", ui-monospace, SFMono-Regular, monospace;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
@@ -51,21 +55,21 @@ body,
 }
 
 body {
-  background-color: var(--mongo-black);
-  color: var(--mongo-fog);
+  background-color: var(--mdb-canvas, #f9fbfa);
+  color: var(--mongo-black);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: var(--mongo-spruce);
-  color: var(--mongo-leaf);
+  background: var(--mongo-mint);
+  color: var(--mongo-black);
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #00684a #001e2b;
+  scrollbar-color: #c1c7c6 #f9fbfa;
 }
 
 *::-webkit-scrollbar {
@@ -74,16 +78,16 @@ body {
 }
 
 *::-webkit-scrollbar-track {
-  background: #001e2b;
+  background: #f9fbfa;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #00684a;
+  background: #c1c7c6;
   border-radius: 999px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #00ed64;
+  background: #00684a;
 }
 
 .mongo-terminal {
@@ -91,7 +95,52 @@ body {
 }
 
 .custom-bento {
-  background: radial-gradient(120% 120% at 50% 10%, #0c2a35 40%, rgba(0, 104, 74, 0.22) 100%);
+  background: radial-gradient(120% 120% at 50% 10%, #fff 40%, rgba(192, 250, 230, 0.45) 100%);
+}
+
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 2px 4px 2px 2px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.brand-logo:hover .brand-logo-mark {
+  transform: translateY(-1px);
+}
+
+.brand-logo:focus-visible {
+  outline: 2px solid var(--mongo-spruce);
+  outline-offset: 3px;
+}
+
+.brand-logo-mark {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  transition: transform 160ms ease;
+}
+
+.brand-logo-word {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.brand-logo-conquer {
+  color: var(--mongo-black);
+}
+
+.brand-logo-context {
+  color: var(--mongo-spruce);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -231,4 +280,96 @@ body {
   .agent-dock-mark {
     display: inline-flex;
   }
+}
+
+/* Claim cards — same scene + face doodle art as GWCA-CLI sim cards */
+.claim-card-art {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 7.2rem;
+  padding: 0.45rem 0.8rem 0;
+  background: #fff;
+  border-bottom: 1px solid var(--color-mdb-border, #e8edeb);
+  overflow: hidden;
+}
+.claim-card-art-scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 7.2rem;
+  height: 7.2rem;
+}
+.claim-card-art-face {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 3.7rem;
+  height: 3.7rem;
+}
+.claim-card-art-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  display: block;
+}
+.claim-card-art-img-flip {
+  transform: scaleX(-1);
+}
+.claim-card-art-emoji {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+/* Compact table-row identity — scene circle + face badge, same as GWCA-CLI */
+.claim-identity {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  margin-right: 4px;
+  margin-bottom: 2px;
+}
+.claim-identity-scene {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--color-mdb-border, #e8edeb);
+}
+.claim-identity-face {
+  position: absolute;
+  right: -5px;
+  bottom: -3px;
+  z-index: 1;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--color-mdb-border, #e8edeb);
+}
+.claim-identity-scene .claim-card-art-img,
+.claim-identity-face .claim-card-art-img {
+  object-fit: cover;
+  object-position: center;
+}
+.claim-identity .claim-card-art-emoji {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }

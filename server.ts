@@ -1016,7 +1016,16 @@ async function startServer() {
 
   if (useVite) {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      // .env sets NODE_ENV=production for Mongo; that would make Vite skip
+      // the Tailwind serve transform and ship uncompiled CSS (no utilities).
+      mode: 'development',
+      server: {
+        middlewareMode: true,
+        // The stuck :3000 process already owns Vite's default HMR port 24678.
+        hmr: {
+          port: (Number(process.env.PORT) || 3001) + 21678,
+        },
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
