@@ -17,6 +17,10 @@ It is not a chatbot and not a wizard you click through. The agent sends a messag
 
 **It runs with zero configuration.** With an empty `.env`, an ephemeral local `mongod` boots itself and every channel runs in MOCK mode: sends are logged instead of dispatched, so nothing leaves your machine. Add credentials per channel to go live.
 
+![Conquer multi-agent long-horizon architecture](docs/conquer-long-horizon-architecture.png)
+
+The agent keeps running across days until the current task completes. Voice, SMS, and email park on `awaiting_reply`; an inbound webhook (or a connected hangup) is what resumes the thread. Compact `workingMemory` dies with the claim. Checkpoints restore the lineage. Shared `agent_memory` is what the next claim — and the voice agent — already know.
+
 ## Quick start
 
 ```bash
