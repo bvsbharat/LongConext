@@ -119,7 +119,8 @@ function toChatMessages(
   const out: ChatMessage[] = [];
   for (const turn of turns as any[]) {
     const role = turn?.role;
-    const text = turn?.message ?? turn?.original_message ?? turn?.originalMessage;
+    const text =
+      turn?.message ?? turn?.original_message ?? turn?.originalMessage ?? turn?.text ?? turn?.content;
     if (typeof text !== 'string' || text.trim() === '') continue;
     const sender: ChatMessage['sender'] = role === 'agent' ? 'agent' : 'recipient';
     out.push({
@@ -406,6 +407,9 @@ export interface GetConversationResult {
   status?: string;
   transcript?: ChatMessage[];
   summary?: string;
+  callDurationSecs?: number;
+  terminationReason?: string;
+  hasUserAudio?: boolean;
   error?: string;
 }
 
@@ -462,6 +466,9 @@ export async function getConversation(conversationId: string): Promise<GetConver
         recipient: DEFAULT_RECIPIENT_NAME,
       }),
       summary: res.analysis?.transcriptSummary,
+      callDurationSecs: res.metadata?.callDurationSecs,
+      terminationReason: res.metadata?.terminationReason,
+      hasUserAudio: res.hasUserAudio,
     };
   } catch (err: any) {
     console.error(`[voice] Failed to fetch conversation ${conversationId}: ${errText(err)}`);
@@ -552,6 +559,9 @@ export interface ParsedCallWebhook {
   status?: string;
   transcript?: ChatMessage[];
   summary?: string;
+  callDurationSecs?: number;
+  terminationReason?: string;
+  hasUserAudio?: boolean;
   /** Stable dedupe key -- safe to SETNX on. */
   eventId: string;
 }
@@ -622,6 +632,18 @@ export function parseCallWebhook(body: unknown): ParsedCallWebhook | null {
     data.summary ??
     failureReason;
 
+  const metadata = data.metadata && typeof data.metadata === 'object' ? data.metadata : {};
+  const rawDuration = metadata.call_duration_secs ?? metadata.callDurationSecs ?? data.call_duration_secs;
+  const callDurationSecs = typeof rawDuration === 'number' && Number.isFinite(rawDuration) ? rawDuration : undefined;
+  const rawTerm = metadata.termination_reason ?? metadata.terminationReason ?? data.termination_reason;
+  const terminationReason = typeof rawTerm === 'string' && rawTerm.trim() !== '' ? rawTerm : undefined;
+  const hasUserAudio =
+    typeof data.has_user_audio === 'boolean'
+      ? data.has_user_audio
+      : typeof data.hasUserAudio === 'boolean'
+        ? data.hasUserAudio
+        : undefined;
+
   // Prefer a provider-supplied event id -- it is the only value guaranteed
   // stable across ElevenLabs' own retries of the same delivery. Only when none
   // is present do we derive one, and the derivation must stay deterministic
@@ -651,6 +673,9 @@ export function parseCallWebhook(body: unknown): ParsedCallWebhook | null {
     ...(status ? { status } : {}),
     ...(transcript.length ? { transcript } : {}),
     ...(summary ? { summary } : {}),
+    ...(callDurationSecs !== undefined ? { callDurationSecs } : {}),
+    ...(terminationReason ? { terminationReason } : {}),
+    ...(hasUserAudio !== undefined ? { hasUserAudio } : {}),
     eventId,
   };
 }
@@ -695,16 +720,11 @@ export function isCallCompleteForProgression(parsed: ParsedCallWebhook): {
     };
   }
 
-  // ElevenLabs often posts post_call_transcription with an empty transcript and
-  // analysis.transcript_summary = "Summary couldn't be generated for this call."
-  // on missed/no-answer. That must not count as a completed contact.
+  // ElevenLabs often posts an empty transcript plus
+  // "Summary couldn't be generated" on missed/no-answer — and also on a
+  // hangup before analysis finishes. Do not treat that placeholder as a
+  // completed contact by itself; require recipient speech or a connected hangup.
   const uselessSummary = /summary couldn't be generated/i;
-  if (parsed.summary && uselessSummary.test(parsed.summary) && !(parsed.transcript || []).length) {
-    return {
-      complete: false,
-      reason: 'call produced no transcript/summary; keeping claim parked',
-    };
-  }
 
   const recipientTurns = (parsed.transcript || []).filter(
     m =>
@@ -713,13 +733,54 @@ export function isCallCompleteForProgression(parsed: ParsedCallWebhook): {
       m.text.trim() !== '' &&
       !uselessSummary.test(m.text)
   );
-  if (recipientTurns.length === 0) {
+  if (recipientTurns.length > 0) {
+    return { complete: true, reason: 'recipient spoke; call complete for progression' };
+  }
+
+  // A connected call that then hangs up is done — even if the recipient said
+  // little or the transcript is still empty. Missed/no-answer stays parked.
+  const duration = parsed.callDurationSecs ?? 0;
+  const term = (parsed.terminationReason || '').toLowerCase();
+  const hungUp = /hangup|hang_up|disconnect|end_call|ended|inactivity|max_duration/.test(term);
+  const connected =
+    duration >= 3 ||
+    parsed.hasUserAudio === true ||
+    (parsed.transcript || []).length > 0 ||
+    hungUp;
+  const finished =
+    status === 'done' ||
+    status === 'completed' ||
+    type.includes('post_call_transcription') ||
+    hungUp;
+
+  if (finished && connected) {
     return {
-      complete: false,
-      reason:
-        'call ended with no recipient speech (missed/no-answer); keeping claim parked until a completed conversation or force-advance',
+      complete: true,
+      reason: 'call finished after connect (disconnect); advancing',
     };
   }
 
-  return { complete: true, reason: 'recipient spoke; call complete for progression' };
+  return {
+    complete: false,
+    reason:
+      'call ended with no recipient speech (missed/no-answer); keeping claim parked until a completed conversation or force-advance',
+  };
+}
+
+/** Fill in transcript/duration from the Conversations API when a webhook is thin. */
+export async function hydrateCallWebhook(parsed: ParsedCallWebhook): Promise<ParsedCallWebhook> {
+  if ((parsed.transcript && parsed.transcript.length > 0) && parsed.callDurationSecs !== undefined) {
+    return parsed;
+  }
+  const fetched = await getConversation(parsed.conversationId);
+  if (!fetched.ok) return parsed;
+  return {
+    ...parsed,
+    status: parsed.status ?? fetched.status,
+    transcript: parsed.transcript?.length ? parsed.transcript : fetched.transcript,
+    summary: parsed.summary ?? fetched.summary,
+    callDurationSecs: parsed.callDurationSecs ?? fetched.callDurationSecs,
+    terminationReason: parsed.terminationReason ?? fetched.terminationReason,
+    hasUserAudio: parsed.hasUserAudio ?? fetched.hasUserAudio,
+  };
 }

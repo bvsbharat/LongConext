@@ -173,30 +173,33 @@ export function registerWebhookRoutes(app: express.Express): void {
         `WEBHOOK_IN:call:${parsed.conversationId}`
       );
 
+      const hydrated = await elevenlabs.hydrateCallWebhook(parsed);
+
       // Do not advance the timeline on missed/no-answer/failed calls — those still
       // produce post-call webhooks, and treating them as success dialed the next
       // contact while the first call was still "in progress" from the user's view.
-      const gate = elevenlabs.isCallCompleteForProgression(parsed);
+      const gate = elevenlabs.isCallCompleteForProgression(hydrated);
       if (!gate.complete) {
         await trace(
           'INFO',
-          `${routeLabel}: not advancing — ${gate.reason} (conversation=${parsed.conversationId})`
+          `${routeLabel}: not advancing — ${gate.reason} (conversation=${hydrated.conversationId})`
         );
         return res.status(200).json({ ok: true, applied: false, reason: gate.reason });
       }
 
       const outcome = await resolveAwaitingContact({
         channel: 'call',
-        lookupValue: parsed.conversationId,
-        transcript: parsed.transcript,
+        lookupValue: hydrated.conversationId,
+        transcript: hydrated.transcript,
         // Prefer real transcript turns; only fall back to summary when it is not the
         // empty "couldn't be generated" placeholder ElevenLabs emits on missed calls.
+        // A connected hangup still needs *some* text or resolveAwaitingContact ignores it.
         replyText:
-          parsed.transcript && parsed.transcript.length > 0
+          hydrated.transcript && hydrated.transcript.length > 0
             ? undefined
-            : parsed.summary && !/summary couldn't be generated/i.test(parsed.summary)
-              ? parsed.summary
-              : undefined,
+            : hydrated.summary && !/summary couldn't be generated/i.test(hydrated.summary)
+              ? hydrated.summary
+              : 'Call ended; the recipient disconnected.',
         eventId: parsed.eventId,
         // Signature-verified provider callback with recipient speech.
         replySource: 'inbound',

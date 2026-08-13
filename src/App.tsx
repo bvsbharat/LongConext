@@ -39,12 +39,12 @@ const LAYOUT_WIDTH_OPTIONS: {
 }[] = [
   {
     id: 'comfortable',
-    mainClass: 'max-w-[1680px]',
+    mainClass: 'max-w-[1428px]',
     pagePad: 'px-4 sm:px-6 md:px-8 lg:px-10',
   },
   {
     id: 'wide',
-    mainClass: 'max-w-[2200px]',
+    mainClass: 'max-w-[1870px]',
     pagePad: 'px-3 sm:px-4 md:px-6 lg:px-8',
   },
   {

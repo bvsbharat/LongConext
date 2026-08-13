@@ -873,6 +873,82 @@ export async function pollSmsInboxFallback(): Promise<Claim | null> {
   return null;
 }
 
+const CALL_POLL_MIN_MS = 8_000;
+let lastCallPollMs = 0;
+
+/**
+ * Safety net for voice: ElevenLabs post-call webhooks often never reach localhost
+ * (the dashboard URL is not this process). While parked on a live call, fetch the
+ * conversation and advance once it is done — including a hangup after connect.
+ */
+export async function pollCallCompletionFallback(): Promise<Claim | null> {
+  const awaiting = await getAwaiting();
+  if (!awaiting || awaiting.channel !== 'call') return null;
+  if (!voiceChannel.isLive()) return null;
+
+  const now = Date.now();
+  if (now - lastCallPollMs < CALL_POLL_MIN_MS) return null;
+  lastCallPollMs = now;
+
+  const prefix = 'claims:lookup:call:';
+  if (!awaiting.lookupKey.startsWith(prefix)) return null;
+  const conversationId = awaiting.lookupKey.slice(prefix.length);
+  if (!conversationId || conversationId.startsWith(SYNTHETIC_PREFIX) || conversationId.startsWith('mock-')) {
+    return null;
+  }
+
+  const conv = await voiceChannel.getConversation(conversationId);
+  if (!conv.ok) return null;
+  if (conv.status === 'initiated' || conv.status === 'in-progress') return null;
+  if (conv.status === 'processing' && !(conv.transcript && conv.transcript.length > 0)) return null;
+  if (conv.status === 'failed') {
+    store.log('INFO', `Call ${conversationId} failed; keeping claim parked on this contact`);
+    return null;
+  }
+
+  const parsed: voiceChannel.ParsedCallWebhook = {
+    conversationId,
+    eventType: 'post_call_transcription',
+    status: conv.status,
+    transcript: conv.transcript,
+    summary: conv.summary,
+    callDurationSecs: conv.callDurationSecs,
+    terminationReason: conv.terminationReason,
+    hasUserAudio: conv.hasUserAudio,
+    eventId: `el-poll:${conversationId}:${conv.status ?? 'done'}`,
+  };
+  const gate = voiceChannel.isCallCompleteForProgression(parsed);
+  if (!gate.complete) {
+    store.log('INFO', `Call poll: not advancing — ${gate.reason} (conversation=${conversationId})`);
+    return null;
+  }
+
+  const uselessSummary = /summary couldn't be generated/i;
+  const replyText =
+    conv.transcript && conv.transcript.length > 0
+      ? undefined
+      : conv.summary && !uselessSummary.test(conv.summary)
+        ? conv.summary
+        : 'Call ended; the recipient disconnected.';
+
+  const outcome = await resolveAwaitingContact({
+    channel: 'call',
+    lookupValue: conversationId,
+    transcript: conv.transcript,
+    replyText,
+    eventId: parsed.eventId,
+    replySource: 'inbound',
+  });
+  if (outcome.status === 'applied') {
+    store.log(
+      'INFO',
+      `Call poll applied conversation ${conversationId} (webhook may be missing) — resuming claim`
+    );
+    return outcome.claim;
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Settlement arithmetic
 // ---------------------------------------------------------------------------

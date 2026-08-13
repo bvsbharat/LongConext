@@ -17,6 +17,7 @@ import {
   getAwaiting,
   getVendorStatus,
   pollSmsInboxFallback,
+  pollCallCompletionFallback,
   synthesizeReply,
   stopActiveClaim,
   withClaimLock,
@@ -619,10 +620,11 @@ app.get('/api/claims/templates', (req, res) => {
 });
 
 // Current claim state, plus what the agent is waiting on and which channels are live.
-// While parked on SMS, also poll Sendblue for inbound replies the receive webhook may
-// have missed — keeps the long-horizon loop moving without a Force Advance.
+// While parked on SMS or a live call, also poll the provider — webhooks often never
+// reach localhost, and a hangup would otherwise leave the claim wedged.
 app.get('/api/claims/active', asyncRoute(async (req, res) => {
   await pollSmsInboxFallback();
+  await pollCallCompletionFallback();
   const currentClaim = await store.get('claims:active');
   res.json({
     claim: currentClaim,

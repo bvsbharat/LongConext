@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   AgentMemoryEntry,
   AgentMemoryStatus,
@@ -18,13 +18,10 @@ import {
 import {
   Terminal,
   Database,
-  Activity,
   RefreshCw,
   Key,
   ShieldAlert,
   ArrowRight,
-  Brain,
-  Hourglass,
   Sparkles,
   GitCommitVertical,
   Undo2,
@@ -97,19 +94,15 @@ export const MongoDashboard: React.FC<MongoDashboardProps> = ({
   ]);
   const [activeTab, setActiveTab] = useState<'events' | 'keys' | 'cli'>('events');
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  const [inspectId, setInspectId] = useState<string>('claim');
 
-  const feedEndRef = useRef<HTMLDivElement>(null);
-  const cliTerminalEndRef = useRef<HTMLDivElement>(null);
+  const eventsPaneRef = useRef<HTMLDivElement>(null);
+  const cliPaneRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    cliTerminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [cliHistory]);
-
-  useEffect(() => {
-    if (activeTab === 'events') {
-      feedEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [logs.length, pubsub.length, activeTab]);
+  const scrollPaneToEnd = (el: HTMLDivElement | null) => {
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  };
 
   const workingMemory =
     claim?.workingMemory?.trim() ||
@@ -121,6 +114,59 @@ export const MongoDashboard: React.FC<MongoDashboardProps> = ({
 
   const activeStep = claim?.timeline?.[claim.currentStepIndex];
 
+  const contextKeys = keys.filter(k => k.key.startsWith('claims:'));
+  const inspectChoices: { id: string; label: string }[] = [
+    { id: 'claim', label: 'Active claim' },
+    { id: 'working', label: 'Working memory' },
+    { id: 'awaiting', label: 'Awaiting contact' },
+    ...contextKeys.map(k => ({ id: `key:${k.key}`, label: k.key })),
+  ];
+
+  const inspectBody = (): { title: string; text: string; empty: boolean } => {
+    if (inspectId === 'working') {
+      return {
+        title: 'claims:working_memory',
+        text: workingMemory || '',
+        empty: !workingMemory,
+      };
+    }
+    if (inspectId === 'awaiting') {
+      const text = awaiting
+        ? JSON.stringify(awaiting, null, 2)
+        : awaitingPretty || '';
+      return { title: 'claims:awaiting', text, empty: !text };
+    }
+    if (inspectId === 'claim') {
+      if (!claim) return { title: 'claims:active', text: '', empty: true };
+      const compact = {
+        id: claim.id,
+        sessionId: claim.sessionId,
+        claimantName: claim.claimantName,
+        claimType: claim.claimType,
+        status: claim.status,
+        claimAmount: claim.claimAmount,
+        shopConcession: claim.shopConcession,
+        currentStepIndex: claim.currentStepIndex,
+        step: activeStep
+          ? { timeLabel: activeStep.timeLabel, signal: activeStep.signal }
+          : null,
+        workingMemory: claim.workingMemory ?? null,
+      };
+      return { title: 'claims:active (summary)', text: JSON.stringify(compact, null, 2), empty: false };
+    }
+    if (inspectId.startsWith('key:')) {
+      const name = inspectId.slice(4);
+      const hit = keys.find(k => k.key === name);
+      return {
+        title: name,
+        text: prettyJson(hit?.value ?? null) ?? hit?.value ?? '',
+        empty: !hit,
+      };
+    }
+    return { title: '', text: '', empty: true };
+  };
+  const inspected = inspectBody();
+
   const handleCommandSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const command = cliInput.trim();
@@ -129,12 +175,14 @@ export const MongoDashboard: React.FC<MongoDashboardProps> = ({
     setCliHistory(prev => [...prev, { cmd: command, response: res }]);
     setCliInput('');
     onRefresh();
+    requestAnimationFrame(() => scrollPaneToEnd(cliPaneRef.current));
   };
 
   const executeHelper = async (cmdStr: string) => {
     const res = await onExecCommand(cmdStr);
     setCliHistory(prev => [...prev, { cmd: cmdStr, response: res }]);
     onRefresh();
+    requestAnimationFrame(() => scrollPaneToEnd(cliPaneRef.current));
   };
 
   const getBadgeColor = (type: string) => {
@@ -151,10 +199,6 @@ export const MongoDashboard: React.FC<MongoDashboardProps> = ({
         return 'bg-mdb-elevated text-mdb-fog border-mdb-border';
     }
   };
-
-  const contextKeys = keys.filter(k =>
-    k.key.startsWith('claims:') || k.key.startsWith('claims:lookup:')
-  );
 
   return (
     <div
@@ -208,86 +252,70 @@ export const MongoDashboard: React.FC<MongoDashboardProps> = ({
         </div>
       </div>
 
-      {/* Always-visible claim / store context */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 flex flex-col gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <Activity className="size-3.5 text-sky-400" />
-            Active claim
+      <div className="rounded-xl border border-slate-800 bg-slate-950/70 overflow-hidden">
+        <div className="flex flex-wrap items-center gap-2 px-3.5 py-2.5 border-b border-slate-800">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mr-1">
+            Context
           </span>
-          {claim ? (
-            <div className="text-[12px] font-mono text-slate-200 space-y-1">
-              <div>
-                <span className="text-slate-500">id </span>
-                {claim.id}
-              </div>
-              <div>
-                <span className="text-slate-500">claimant </span>
-                {claim.claimantName}
-              </div>
-              <div>
-                <span className="text-slate-500">status </span>
-                {claim.status}
-              </div>
-              <div>
-                <span className="text-slate-500">step </span>
-                {activeStep?.timeLabel ?? '—'} · {activeStep?.signal ?? '—'}
-              </div>
-              <div>
-                <span className="text-slate-500">amount </span>
-                ${claim.claimAmount.toLocaleString()}
-                {claim.shopConcession != null && claim.shopConcession > 0
-                  ? ` (−$${claim.shopConcession.toLocaleString()} shop)`
-                  : ''}
-              </div>
-            </div>
-          ) : (
-            <p className="text-[12px] text-slate-500">No active claim loaded.</p>
+          {inspectChoices.slice(0, 3).map(choice => (
+            <button
+              key={choice.id}
+              type="button"
+              onClick={() => setInspectId(choice.id)}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition ${
+                inspectId === choice.id
+                  ? 'bg-mdb-leaf/15 text-mdb-leaf border border-mdb-leaf/30'
+                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-slate-200'
+              }`}
+            >
+              {choice.label}
+            </button>
+          ))}
+          {contextKeys.length > 0 && (
+            <label className="ml-auto flex items-center gap-1.5 text-[11px] text-slate-500">
+              Key
+              <select
+                value={inspectId.startsWith('key:') ? inspectId : ''}
+                onChange={e => {
+                  if (e.target.value) setInspectId(e.target.value);
+                }}
+                className="bg-slate-900 border border-slate-800 text-slate-200 rounded-md px-2 py-1 font-mono text-[11px] max-w-[220px]"
+                aria-label="Inspect a claim key"
+              >
+                <option value="">claims:*</option>
+                {contextKeys.map(k => (
+                  <option key={k.key} value={`key:${k.key}`}>
+                    {k.key}
+                  </option>
+                ))}
+              </select>
+            </label>
           )}
         </div>
-
-        <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 flex flex-col gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <Brain className="size-3.5 text-mdb-leaf" />
-            Working memory
-            <span className="text-slate-600 normal-case font-mono">claims:working_memory</span>
-          </span>
-          <pre className="text-[11px] font-mono text-slate-300 whitespace-pre-wrap max-h-28 overflow-y-auto leading-relaxed">
-            {workingMemory || '(empty — load a claim / complete a contact)'}
-          </pre>
-        </div>
-
-        <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 flex flex-col gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <Hourglass className="size-3.5 text-amber-400" />
-            Awaiting contact
-            <span className="text-slate-600 normal-case font-mono">claims:awaiting</span>
-          </span>
-          {awaiting ? (
-            <div className="text-[12px] font-mono text-amber-100/90 space-y-1">
-              <div>
-                <span className="text-slate-500">channel </span>
-                {awaiting.channel}
-              </div>
-              <div>
-                <span className="text-slate-500">subStep </span>
-                {awaiting.subStepId}
-              </div>
-              <div className="truncate">
-                <span className="text-slate-500">lookup </span>
-                {awaiting.lookupKey}
-              </div>
-              <div>
-                <span className="text-slate-500">sentAt </span>
-                {awaiting.sentAt}
-              </div>
-            </div>
-          ) : awaitingPretty ? (
-            <pre className="text-[11px] font-mono text-slate-300 whitespace-pre-wrap max-h-28 overflow-y-auto">
-              {awaitingPretty}
-            </pre>
+        <div className="px-3.5 py-3">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-[10px] font-mono text-slate-500">{inspected.title}</span>
+            {claim && inspectId === 'claim' && (
+              <span className="text-[11px] text-slate-400">
+                {claim.claimantName} · {claim.status}
+                {activeStep ? ` · ${activeStep.timeLabel}` : ''}
+              </span>
+            )}
+          </div>
+          {inspected.empty ? (
+            <p className="text-[12px] text-slate-500 py-6 text-center">
+              {inspectId === 'claim'
+                ? 'No active claim loaded.'
+                : inspectId === 'working'
+                  ? 'Working memory is empty — load a claim or complete a contact.'
+                  : inspectId === 'awaiting'
+                    ? 'Nothing waiting on a reply.'
+                    : 'No value for this key.'}
+            </p>
           ) : (
-            <p className="text-[12px] text-slate-500">Nothing waiting on a reply.</p>
+            <pre className="text-[12px] font-mono text-slate-200 whitespace-pre-wrap break-words leading-relaxed max-h-[22rem] overflow-y-auto bg-slate-950/80 border border-slate-900 rounded-lg p-3">
+              {inspected.text}
+            </pre>
           )}
         </div>
       </div>
@@ -404,7 +432,7 @@ export const MongoDashboard: React.FC<MongoDashboardProps> = ({
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
         <div className="flex flex-col border border-slate-800 rounded-xl overflow-hidden bg-slate-950/50 min-h-[420px]">
-          <div className="flex border-b border-slate-800 bg-slate-950 p-1">
+          <div className="flex border-b border-slate-800 bg-slate-950 p-1 items-center">
             <button
               type="button"
               onClick={() => setActiveTab('events')}
@@ -441,9 +469,19 @@ export const MongoDashboard: React.FC<MongoDashboardProps> = ({
               <Terminal className="size-3.5" />
               CLI
             </button>
+            {activeTab === 'events' && (
+              <button
+                type="button"
+                onClick={() => scrollPaneToEnd(eventsPaneRef.current)}
+                className="ml-1 px-2 py-1 text-[10px] font-semibold text-slate-400 hover:text-slate-200 border border-slate-800 rounded-md shrink-0"
+                title="Jump to the newest event without following live updates"
+              >
+                Latest
+              </button>
+            )}
           </div>
 
-          <div className="p-3 flex-1 h-[380px] overflow-y-auto">
+          <div ref={eventsPaneRef} className="p-3 flex-1 h-[380px] overflow-y-auto">
             {activeTab === 'events' && (
               <div className="flex flex-col gap-0.5 font-mono text-[11px]">
                 {logs.length === 0 && pubsub.length === 0 ? (
@@ -492,7 +530,6 @@ export const MongoDashboard: React.FC<MongoDashboardProps> = ({
                         ))}
                       </>
                     )}
-                    <div ref={feedEndRef} />
                   </>
                 )}
               </div>
@@ -597,7 +634,10 @@ export const MongoDashboard: React.FC<MongoDashboardProps> = ({
             </span>
           </div>
 
-          <div className="p-4 flex-1 h-[270px] overflow-y-auto font-mono text-xs flex flex-col gap-3 bg-slate-950 select-text">
+          <div
+            ref={cliPaneRef}
+            className="p-4 flex-1 h-[270px] overflow-y-auto font-mono text-xs flex flex-col gap-3 bg-slate-950 select-text"
+          >
             {cliHistory.map((item, idx) => (
               <div key={idx} className="flex flex-col gap-1 border-b border-slate-900/60 pb-2">
                 <div className="flex items-center gap-1 text-slate-400">
@@ -609,7 +649,6 @@ export const MongoDashboard: React.FC<MongoDashboardProps> = ({
                 </pre>
               </div>
             ))}
-            <div ref={cliTerminalEndRef} />
           </div>
 
           <div className="p-3 border-t border-slate-900 bg-slate-900/30 flex flex-wrap gap-1.5 items-center">
