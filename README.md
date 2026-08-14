@@ -2,6 +2,8 @@
 
 A **long-horizon insurance claim agent that does not cold-start.** Open a claim and the agent drives it end to end over days or weeks — texting and calling the policyholder and vendors, keeping state and memory in MongoDB, and stopping for a human adjuster's sign-off before any money moves.
 
+**Live demo:** [https://web-production-96d85.up.railway.app](https://web-production-96d85.up.railway.app)
+
 ![How a Conquer claim runs for days](docs/conquer-architecture-simple.png)
 
 MongoDB holds **state, lineage, and memory** as three different things. Conflating them is how a long-horizon agent cold-starts.
