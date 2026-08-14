@@ -253,15 +253,14 @@ function fallbackBrief(claim: Claim, sub: SubStep, channel: Channel, authored?: 
       smsBody: `Settlement ready for ${claim.id}: repairs ${gross}.${concessionNote} We'll call to confirm.`,
       emailSubject: subject,
       emailBody: body,
-      firstMessage: `Hi ${claim.claimantName}, Conquer calling to confirm settlement on ${claim.id}. Agreed repairs are ${gross}.${concessionNote} Does that work for you?`,
+      firstMessage: `Hi ${claim.claimantName}, Conquer — claim ${claim.id} settlement is ${gross}.${concessionNote} Can you confirm?`,
       contextVars: contextVarsFor(claim, sub),
     };
   }
 
   if (isDynamicSettlementCopy(sub) && channel === 'call') {
     const line =
-      `Hi ${claim.claimantName}, this is Conquer with final confirmation on claim ${claim.id}. ` +
-      `Agreed repairs are ${gross}.${concessionNote} After your deductible we pay the shop the net amount. Can you confirm that works?`;
+      `Hi ${claim.claimantName}, Conquer — claim ${claim.id} repairs are ${gross}.${concessionNote} Confirm that works?`;
     return {
       channel,
       recipientName,
@@ -457,48 +456,33 @@ Rules:
   });
 }
 
-/** What the voice agent must gather on this contact — drives the call checklist. */
+/** One primary ask for the voice agent — keep calls short. */
 function collectionGoalsFor(sub: SubStep): string {
   const role = (sub.systemName || '').toLowerCase();
   const desc = (sub.description || '').toLowerCase();
 
   if (role.includes('payer') && (desc.includes('auth') || desc.includes('evidence') || desc.includes('prior'))) {
-    return [
-      '1) Current prior-authorization status: pending, approved, or denied.',
-      '2) If not approved: the exact clinical evidence / documents still required (get specifics, not just "more records").',
-      '3) Any authorization, case, or reference number they can share.',
-      'Do not end the call until you have status, and if pending/denied, a concrete evidence list.',
-    ].join(' ');
+    return 'Ask only: is prior auth approved, pending, or denied? If they volunteer missing docs or a case number, note it. Then end.';
   }
 
   if (role.includes('provider') && desc.includes('evidence')) {
-    return [
-      '1) Confirm they can supply the clinical evidence the payer requested.',
-      '2) Which documents they will submit and roughly when.',
-    ].join(' ');
+    return 'Ask only: can you submit the requested clinical evidence? Then end.';
   }
 
-  // Auto body / repair shop negotiation — mirrors real adjuster estimate correction.
   if (
     role.includes('shop') ||
     role.includes('body') ||
     role.includes('repair') ||
     (desc.includes('quote') && (desc.includes('labor') || desc.includes('concession') || desc.includes('oem')))
   ) {
-    return [
-      '1) Align labor (e.g. sensor calibration) to the insurer network rate.',
-      '2) Confirm OEM parts where required for safety sensors/cameras.',
-      '3) Ask for a price concession / estimate correction if the quote is above network guidelines — get a revised dollar total.',
-      '4) Confirm the final agreed repair total before hanging up.',
-      'Be professional: you are negotiating on behalf of the carrier, not demanding an unfair cut.',
-    ].join(' ');
+    return 'Ask only: can you revise the estimate to network rate and give the new dollar total? Then end. Do not invent a discount.';
   }
 
   if (role.includes('claimant') || role.includes('patient') || role.includes('member')) {
-    return `Confirm the details needed for: ${sub.description}.`;
+    return `Ask only what you need for: ${sub.description}. Then end.`;
   }
 
-  return `Collect everything required for: ${sub.description}. Ask follow-ups until the facts are concrete.`;
+  return `Ask one concrete question for: ${sub.description}. Then end.`;
 }
 
 /** Template memory for the active step + anything learned from prior contacts. */
@@ -635,13 +619,13 @@ You are contacting "${sub.systemName}" over ${resolved.toUpperCase()} in order t
 Role rule: address "${sub.systemName}" as that party. Example: if contacting Payer, ask for authorization status; do not ask the payer what evidence Conquer should upload as if they were the patient.
 ${authored && !dynamicMoney ? `The intended message was drafted as: "${authored}". Stay faithful to its intent, but if dollar amounts differ from CURRENT AGREED REPAIR TOTAL, use the current total.` : ''}
 ${dynamicMoney ? `CRITICAL: Every dollar figure in emailSubject/emailBody/firstMessage/smsBody MUST use ${claim.claimAmount} as the repair total. Mention any concession if present.` : ''}
-Write the OUTBOUND message only - no recipient reply, no generic robotic greeting.
-Keep it professional, direct, and specific to this claim.
+Write the OUTBOUND message only - no recipient reply, no small talk.
+Be FAST and BRIEF. One ask. Do not stack questions. Do not recap the whole claim.
 Field guidance:
-- smsBody: under 320 characters, no links.
-- emailSubject: under 80 characters.
-- emailBody: plain text only (the mailer adds light HTML). 2-4 short paragraphs separated by blank lines. Include a Claim:/Policy:/amount fact block as "Key: Value" lines on their own lines when useful. Sign with "— Conquer claims agent". No HTML tags.
-- firstMessage: one short spoken opener. Name the role you are calling (${sub.systemName}), mention patient ${claim.claimantName} and claim ${claim.id}. Ask for status/help per the purpose — do not ask them to invent what evidence you should send.`,
+- smsBody: under 200 characters, one sentence plus one question max, no links.
+- emailSubject: under 60 characters.
+- emailBody: 1 short paragraph + a Claim:/Policy:/amount fact block. Sign with "— Conquer claims agent". No HTML tags.
+- firstMessage: ONE spoken sentence (under 25 words). Name ${sub.systemName}, claim ${claim.id}, and the single ask. No "do you have a moment", no second question.`,
   });
 
   // Prefer template phone openers except settlement confirms (those need live totals).
